@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+node_modules/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.coverage
+dist/
+build/
+renderer/pdf_cache/
+_dados_e_scripts/Diarios_Oficiais_Caruaru/
+_dados_e_scripts/Diario_Caruaru_App/
+validacao_visual/
+.claude/
+Thumbs.db
+.DS_Store

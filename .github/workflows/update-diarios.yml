@@ -1,0 +1,58 @@
+name: Atualizar dados do Diario Caruaru
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-diarios:
+    runs-on: ubuntu-latest
+    env:
+      TZ: America/Sao_Paulo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar Poppler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+
+      - name: Atualizar dados incrementais
+        run: |
+          python - <<'PY'
+          import json
+          import servidor_app
+
+          result = servidor_app.update_data()
+          print(json.dumps(result, ensure_ascii=False))
+          if not result.get("ok"):
+              raise SystemExit(result.get("message") or "Falha ao atualizar dados.")
+          PY
+
+      - name: Rodar testes alvo
+        run: |
+          python -m unittest _dados_e_scripts.test_app_final_interface _dados_e_scripts.test_atualizacao_incremental -v
+
+      - name: Commitar mudancas quando houver alteracao real
+        run: |
+          if git diff --quiet -- renderer/dados; then
+            echo "Sem mudancas em renderer/dados."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add renderer/dados
+          git commit -m "chore: atualizar dados do diario"
+          git push

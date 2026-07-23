@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' file: data:; img-src 'self' data: file:; connect-src 'self' file:;">
+  <title>Diário Oficial de Caruaru — Busca</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#14513f">
+  <link rel="icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="faixa-oficial" aria-hidden="true"></div>
+
+  <header class="topo">
+    <div class="topo-marca">
+      <img src="assets/brasao-caruaru.png" alt="Brasão de Caruaru">
+      <div class="topo-titulos">
+        <p class="topo-chapeu">Prefeitura Municipal de Caruaru</p>
+        <h1>Diário Oficial</h1>
+        <p id="dataStatus" class="topo-status">Carregando dados…</p>
+      </div>
+    </div>
+    <div class="topo-acoes">
+      <span id="updateStatus" class="update-status" role="status"></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="busca-hero">
+      <label class="busca-caixa" for="searchInput">
+        <svg class="busca-lupa" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16.5 16.5 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="searchInput" type="search" autocomplete="off" spellcheck="false"
+               placeholder="Buscar em todos os diários — nome, decreto, portaria, assunto…" disabled>
+        <button id="limparBusca" type="button" hidden aria-label="Limpar busca">&times;</button>
+      </label>
+      <p id="searchHint" class="busca-dica">Preparando a busca…</p>
+    </section>
+
+    <p id="resumoBusca" class="resumo-busca" hidden></p>
+    <section id="resultados" class="resultados"></section>
+    <div class="mostrar-mais-area">
+      <button id="mostrarMais" type="button" hidden>Mostrar mais diários</button>
+    </div>
+
+    <section id="estadoVazio" class="estado-vazio" hidden>
+      <div id="vazioTotais" class="vazio-totais"></div>
+      <div class="vazio-ultimos">
+        <h2>Últimos diários publicados</h2>
+        <ol id="ultimosDiarios"></ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <p>Fonte: <span>diariooficial.caruaru.pe.gov.br</span> · Consulta local, sem valor oficial de publicação.</p>
+  </footer>
+
+  <div id="leitor" class="leitor" hidden>
+    <div class="leitor-topo" role="toolbar" aria-label="Leitor de atos">
+      <button id="leitorVoltar" type="button" class="leitor-voltar">
+        <svg class="icone" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></svg>
+        <span>Voltar</span>
+      </button>
+      <div id="leitorMeta" class="leitor-meta"></div>
+      <div class="leitor-acoes">
+        <div id="leitorOcorrencias" class="leitor-ocorrencias" hidden>
+          <button id="marcaAnterior" type="button" aria-label="Ocorrência anterior">&#9650;</button>
+          <span id="marcaContador">0/0</span>
+          <button id="marcaProxima" type="button" aria-label="Próxima ocorrência">&#9660;</button>
+        </div>
+        <a id="leitorPdf" class="leitor-pdf" href="#" target="_blank" rel="noopener">Abrir PDF</a>
+        <button id="leitorLista" type="button" class="leitor-lista-botao">Atos deste diário</button>
+      </div>
+    </div>
+
+    <div class="leitor-rolagem" id="leitorRolagem">
+      <div class="leitor-nav">
+        <button id="atoAnterior" type="button">&#9664; Ato anterior</button>
+        <span id="atoPosicao"></span>
+        <button id="atoProximo" type="button">Próximo ato &#9654;</button>
+      </div>
+      <article class="leitor-artigo">
+        <p id="leitorEdicao" class="leitor-edicao"></p>
+        <h2 id="leitorTitulo"></h2>
+        <p id="leitorAssunto" class="leitor-assunto" hidden></p>
+        <div id="leitorCorpo" class="body-text"></div>
+      </article>
+    </div>
+
+    <aside id="leitorDrawer" class="leitor-drawer" hidden>
+      <header>
+        <h2>Atos deste diário</h2>
+        <button id="drawerFechar" type="button" aria-label="Fechar lista">&times;</button>
+      </header>
+      <ol id="drawerLista"></ol>
+    </aside>
+  </div>
+
+  <script src="core/diario-busca.js"></script>
+  <script src="core/plataforma.js"></script>
+  <script src="app.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations()
+          .then((registrations) => registrations.forEach((registration) => registration.unregister()))
+          .catch(() => {});
+      }
+      if ('caches' in window) {
+        caches.keys()
+          .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+          .catch(() => {});
+      }
+    });
+  </script>
+</body>
+</html>
