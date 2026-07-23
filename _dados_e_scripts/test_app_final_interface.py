@@ -76,6 +76,8 @@ class FinalAppInterfaceTest(unittest.TestCase):
         self.assertIn("MANUAL_UPDATE_KEY", function_js)
         self.assertIn("GITHUB_ACTIONS_TOKEN", function_js)
         self.assertIn("actions/workflows/update-diarios.yml/dispatches", function_js)
+        self.assertIn("String(env.GITHUB_ACTIONS_TOKEN).trim()", function_js)
+        self.assertIn("response.status === 401 || response.status === 403", function_js)
         self.assertNotIn("GITHUB_ACTIONS_TOKEN", platform_js)
 
     def test_workflow_keeps_schedule_and_manual_dispatch(self):

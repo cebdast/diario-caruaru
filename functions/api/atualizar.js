@@ -21,11 +21,12 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, message: 'Chave de atualizacao invalida.' }, 401);
   }
 
+  const githubToken = String(env.GITHUB_ACTIONS_TOKEN).trim();
   const response = await fetch(GITHUB_DISPATCH_URL, {
     method: 'POST',
     headers: {
       accept: 'application/vnd.github+json',
-      authorization: `Bearer ${env.GITHUB_ACTIONS_TOKEN}`,
+      authorization: `Bearer ${githubToken}`,
       'content-type': 'application/json',
       'x-github-api-version': '2022-11-28',
     },
@@ -33,6 +34,18 @@ export async function onRequestPost({ request, env }) {
   });
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      return json({
+        ok: false,
+        message: 'GitHub recusou o token. Confirme Actions: Read and write e o repositorio diario-caruaru.',
+      }, 502);
+    }
+    if (response.status === 404) {
+      return json({
+        ok: false,
+        message: 'GitHub nao encontrou o repositorio ou o workflow update-diarios.yml.',
+      }, 502);
+    }
     return json({ ok: false, message: 'O GitHub recusou a solicitacao de atualizacao.' }, 502);
   }
 
