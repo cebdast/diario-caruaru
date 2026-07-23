@@ -10,6 +10,7 @@ import sys
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+from urllib.parse import quote
 
 from baixar_diarios_caruaru import (
     END_DATE,
@@ -77,13 +78,11 @@ def read_csv(name: str) -> list[dict[str, str]]:
 def file_url(path_value: str) -> str:
     if not path_value:
         return ""
-    path = Path(path_value)
-    if not path.is_absolute():
-        path = Path.cwd() / path
-    try:
-        return path.resolve().as_uri()
-    except ValueError:
-        return ""
+    filename = Path(path_value).name
+    edition = re.search(r"Diario[-_ ]Oficial[-_ ](\d+)", filename, re.IGNORECASE)
+    if edition:
+        filename = f"Diario Oficial {edition.group(1)}.pdf"
+    return f"https://diariooficial.caruaru.pe.gov.br/diario/{quote(filename)}"
 
 
 def append_pdf_page(url: str, page: int | None) -> str:

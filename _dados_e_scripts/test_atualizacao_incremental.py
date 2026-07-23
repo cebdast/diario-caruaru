@@ -108,6 +108,16 @@ class IncrementalUpdateTest(unittest.TestCase):
 
         self.assertRegex(value, r"[+-]\d{2}:\d{2}$")
 
+    def test_pdf_url_uses_official_portal_instead_of_local_path(self):
+        module = load_generator_module()
+
+        value = module.file_url("2026/07 - Julho/2026-07-20_Diario-Oficial-2610.pdf")
+
+        self.assertEqual(
+            value,
+            "https://diariooficial.caruaru.pe.gov.br/diario/Diario%20Oficial%202610.pdf",
+        )
+
     def test_write_app_data_splits_large_year_into_small_shards(self):
         module = load_generator_module()
         with tempfile.TemporaryDirectory() as tmpdir:
