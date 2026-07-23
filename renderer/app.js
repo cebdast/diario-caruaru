@@ -550,11 +550,12 @@ async function aplicarDados(data, opts) {
   // Carrega do ano mais recente para o mais antigo; a busca é liberada
   // assim que o primeiro ano fica pronto e vai crescendo em segundo plano.
   const anos = data.years.slice().sort((a, b) => Number(b.ano) - Number(a.ano));
+  const totalArquivos = anos.length;
   state.carregandoAnos = true;
   const falhas = [];
-  for (let i = 0; i < anos.length; i++) {
+  for (let i = 0; i < totalArquivos; i++) {
     const ano = anos[i];
-    hint.textContent = `Preparando ${ano.ano}… (${i + 1} de ${anos.length} anos)`;
+    hint.textContent = `Preparando ${ano.ano}… (${i + 1} de ${totalArquivos} arquivos de dados)`;
     try {
       const url = `dados/${ano.arquivo}${cacheBust ? `?t=${Date.now()}` : ''}`;
       const resposta = await fetch(url, { cache: 'no-store' });
