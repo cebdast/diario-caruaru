@@ -20,6 +20,7 @@ const state = {
     marcas: [],
     marcaAtual: -1,
   },
+  manualUpdateKey: '',
 };
 
 const escapeHtml = (value) => window.diarioBusca.escapeHtml(value);
@@ -728,27 +729,42 @@ function wireEvents() {
 
 }
 
-async function configurarAtualizacaoLocal() {
+async function solicitarAtualizacaoManual() {
   const button = $('#refreshData');
-  if (!window.plataforma.podeAtualizar) {
+  const status = $('#updateStatus');
+  const chaveDigitada = state.manualUpdateKey || window.prompt('Informe a chave de atualizacao:');
+  const chave = String(chaveDigitada || '').trim();
+  if (!chave) return;
+
+  button.disabled = true;
+  button.classList.add('atualizando');
+  status.textContent = 'Solicitando atualizacao...';
+  try {
+    const result = await window.plataforma.solicitarAtualizacao(chave);
+    state.manualUpdateKey = chave;
+    status.textContent = result.message || 'Atualizacao solicitada. Aguarde a publicacao.';
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    button.disabled = false;
+    button.classList.remove('atualizando');
+  }
+}
+
+function configurarAtualizacaoManual() {
+  const button = $('#refreshData');
+  if (!button) return;
+  if (window.plataforma.ambiente !== 'browser') {
     button.hidden = true;
     return;
   }
-  if (window.plataforma.ambiente === 'browser') {
-    // Servidor estático simples (ex.: python -m http.server) não sabe atualizar.
-    try {
-      const response = await fetch('/api/capabilities');
-      const caps = await response.json();
-      if (!caps || !caps.update) button.hidden = true;
-    } catch (_) {
-      button.hidden = true;
-    }
-  }
+  button.addEventListener('click', solicitarAtualizacaoManual);
 }
 
 async function init() {
   try {
     wireEvents();
+    configurarAtualizacaoManual();
     const data = await window.plataforma.carregarDados();
     await aplicarDados(data);
     if (!('ontouchstart' in window)) $('#searchInput').focus();

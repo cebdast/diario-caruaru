@@ -40,3 +40,18 @@ npm run mobile:open
 ```
 
 O arquivo principal de dados é `renderer/dados/diario-caruaru.json`.
+
+## Atualizacao manual no site
+
+O site tambem possui o botao `Atualizar agora`. Ele dispara o mesmo workflow
+automatico do GitHub Actions; a rotina noturna continua ativa.
+
+No Cloudflare Pages, cadastre estes segredos no ambiente **Production**:
+
+- `GITHUB_ACTIONS_TOKEN`: token fine-grained do GitHub com acesso somente ao
+  repositorio `cebdast/diario-caruaru` e permissao **Actions: Read and write**.
+- `MANUAL_UPDATE_KEY`: uma chave criada por voce para proteger o botao publico.
+
+Depois de cadastrar os segredos, publique um novo deploy do Pages. A chave do
+botao nunca e enviada ao GitHub; somente a Function do Cloudflare conhece o
+token de Actions.

@@ -92,6 +92,20 @@
     return { ok: false, message: 'A atualizacao local esta disponivel apenas no app de PC.' };
   }
 
+  async function solicitarAtualizacao(chave) {
+    const response = await fetch('/api/atualizar', {
+      method: 'POST',
+      headers: { 'X-Update-Key': chave },
+      cache: 'no-store',
+    });
+    let result = {};
+    try { result = await response.json(); } catch (_) { /* resposta sem JSON */ }
+    if (!response.ok) {
+      throw new Error(result.message || 'Nao foi possivel solicitar a atualizacao.');
+    }
+    return result;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add(isElectron ? 'electron' : 'mobile');
   });
@@ -100,6 +114,7 @@
     carregarDados,
     abrirPdf,
     atualizarDados,
+    solicitarAtualizacao,
     pdfHref,
     podeAtualizar: (isElectron && !!(global.api && typeof global.api.atualizarDados === 'function')) || isLocalHelper,
     ambiente: isElectron ? 'electron' : 'browser',

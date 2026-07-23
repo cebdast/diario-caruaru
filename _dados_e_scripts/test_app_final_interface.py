@@ -45,10 +45,11 @@ class FinalAppInterfaceTest(unittest.TestCase):
         self.assertIn(".bloco-diario", css)
         self.assertIn("ocorrencia-atual", css)
 
-    def test_public_interface_hides_manual_refresh_button(self):
+    def test_public_interface_exposes_manual_refresh_button(self):
         html = (renderer_root() / "index.html").read_text(encoding="utf-8")
 
-        self.assertNotIn('id="refreshData"', html)
+        self.assertIn('id="refreshData"', html)
+        self.assertIn("Atualizar agora", html)
         self.assertIn('id="dataStatus"', html)
 
     def test_search_engine_groups_by_diary(self):
@@ -65,13 +66,23 @@ class FinalAppInterfaceTest(unittest.TestCase):
         self.assertIn("#page=", platform_js)
         self.assertIn("appendPage", platform_js)
 
-    def test_public_platform_does_not_expose_browser_update_flow(self):
+    def test_public_platform_uses_protected_manual_update_flow(self):
         platform_js = (renderer_root() / "core" / "plataforma.js").read_text(encoding="utf-8")
         app_js = (renderer_root() / "app.js").read_text(encoding="utf-8")
+        function_js = (APP_ROOT.parent / "functions" / "api" / "atualizar.js").read_text(encoding="utf-8")
 
-        self.assertNotIn("fetch('/api/update'", platform_js)
-        self.assertNotIn("function refreshData()", app_js)
-        self.assertNotIn("configurarBotaoAtualizar()", app_js)
+        self.assertIn("/api/atualizar", platform_js)
+        self.assertIn("function configurarAtualizacaoManual()", app_js)
+        self.assertIn("MANUAL_UPDATE_KEY", function_js)
+        self.assertIn("GITHUB_ACTIONS_TOKEN", function_js)
+        self.assertIn("actions/workflows/update-diarios.yml/dispatches", function_js)
+        self.assertNotIn("GITHUB_ACTIONS_TOKEN", platform_js)
+
+    def test_workflow_keeps_schedule_and_manual_dispatch(self):
+        workflow = (APP_ROOT.parent / ".github" / "workflows" / "update-diarios.yml").read_text(encoding="utf-8")
+
+        self.assertIn('cron: "0 3 * * *"', workflow)
+        self.assertIn("workflow_dispatch:", workflow)
 
 
 if __name__ == "__main__":
