@@ -12,13 +12,13 @@ function json(data, status = 200) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const updateKey = request.headers.get('X-Update-Key') || '';
-  if (!env.MANUAL_UPDATE_KEY || updateKey !== env.MANUAL_UPDATE_KEY) {
-    return json({ ok: false, message: 'Chave de atualizacao invalida.' }, 401);
+  if (!env.MANUAL_UPDATE_KEY || !env.GITHUB_ACTIONS_TOKEN) {
+    return json({ ok: false, message: 'Atualizacao manual ainda nao foi configurada.' }, 503);
   }
 
-  if (!env.GITHUB_ACTIONS_TOKEN) {
-    return json({ ok: false, message: 'Atualizacao manual ainda nao foi configurada.' }, 503);
+  const updateKey = request.headers.get('X-Update-Key') || '';
+  if (updateKey !== env.MANUAL_UPDATE_KEY) {
+    return json({ ok: false, message: 'Chave de atualizacao invalida.' }, 401);
   }
 
   const response = await fetch(GITHUB_DISPATCH_URL, {
